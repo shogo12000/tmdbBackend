@@ -50,7 +50,7 @@ router.post('/login', async (req, res) => {
         maxAge: 60 * 60 * 1000     // 1 hora
     });
 
-  
+    res.json({ message: "funcionando"})
 });
 
 module.exports = router;
