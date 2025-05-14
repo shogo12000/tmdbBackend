@@ -1,3 +1,4 @@
+//https://dashboard.render.com/web/srv-d0i5otmmcj7s739nsj10/events
 const express = require('express'); 
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -11,7 +12,7 @@ app.use('/api/auth', authRoutes);
  
 app.use(cors({
   origin: '*', // coloque a origem do seu frontend aqui
-  credentials: true // se você for usar cookies ou auth com headers
+  credentials: true // se  for usar cookies ou auth com headers
 }));
 
 const PORT = process.env.PORT || 4000;

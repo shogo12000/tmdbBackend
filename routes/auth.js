@@ -32,18 +32,25 @@ router.post('/register', async (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-  if (!user) return res.status(400).json({ message: 'Usuário não encontrado' });
+    if (!user) return res.status(400).json({ message: 'Usuário não encontrado' });
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) return res.status(400).json({ message: 'Senha incorreta' });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) return res.status(400).json({ message: 'Senha incorreta' });
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,              // só funciona com HTTPS (obrigatório em produção)
+        sameSite: 'Strict',        // ou 'Lax'/'None' dependendo do seu frontend
+        maxAge: 60 * 60 * 1000     // 1 hora
+    });
+
   
-  res.json({ token });
 });
 
 module.exports = router;
