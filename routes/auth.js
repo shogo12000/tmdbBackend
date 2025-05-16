@@ -98,7 +98,7 @@ router.post('/google', async (req, res) => {
         // Exemplo: salvar em cookie
         res.cookie('session_token', token, {
             httpOnly: true,
-            secure: true, // true em produção com HTTPS
+            secure: false, // true em produção com HTTPS
             sameSite: 'None',
         });
 
