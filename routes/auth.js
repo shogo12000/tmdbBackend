@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
         res.cookie('session_token', token, {
             httpOnly: true,
             secure: true,
-            sameSite: 'Strict',
+            sameSite: 'None',
             maxAge: 60 * 60 * 1000
         });
 
@@ -68,7 +68,7 @@ router.post('/logout', (req, res) => {
     res.clearCookie('session_token', {
         httpOnly: true,
         secure: false,
-        sameSite: 'Strict'
+        sameSite: 'None'
     });
 
     res.status(200).json({ message: 'Logout realizado com sucesso' });
@@ -99,7 +99,7 @@ router.post('/google', async (req, res) => {
         res.cookie('session_token', token, {
             httpOnly: true,
             secure: false, // true em produção com HTTPS
-            sameSite: 'Lax',
+            sameSite: 'None',
         });
 
         res.json({ message: 'Usuário autenticado', user: { email, name, picture } });
