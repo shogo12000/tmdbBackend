@@ -51,7 +51,7 @@ router.post('/login', async (req, res) => {
 
         res.cookie('session_token', token, {
             httpOnly: true,
-            secure: false,
+            secure: true,
             sameSite: 'None',
             maxAge: 60 * 60 * 1000
         });
@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
 router.post('/logout', (req, res) => {
     res.clearCookie('session_token', {
         httpOnly: true,
-        secure: false,
+        secure: true,
         sameSite: 'None'
     });
 
@@ -98,7 +98,7 @@ router.post('/google', async (req, res) => {
         // Exemplo: salvar em cookie
         res.cookie('session_token', token, {
             httpOnly: true,
-            secure: false, // true em produção com HTTPS
+            secure: true, // true em produção com HTTPS
             sameSite: 'None',
         });
 
