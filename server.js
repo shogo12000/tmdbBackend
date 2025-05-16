@@ -14,7 +14,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://front-end-login-two.vercel.app/'
+  'https://front-end-login-two.vercel.app'
 ];
 
 app.use(cors({
