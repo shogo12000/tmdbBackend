@@ -130,9 +130,9 @@ router.get('/me', (req, res) => {
 
  function isAuthenticated(req, res, next) {
     console.log("MIDDLWARE FUNCIONANDO")
-    return next();
-//   const authHeader = req.headers.authorization;
 
+  const token = req.cookies.session_token;
+    console.log(token);
 //   if (!authHeader?.startsWith('Bearer ')) {
 //     return res.status(401).json({ error: 'Token não fornecido' });
 //   }
@@ -161,6 +161,7 @@ router.get('/me', (req, res) => {
 //       return res.status(403).json({ error: 'Token inválido' });
 //     }
 //   }
+    return next();
 }
 
 
