@@ -15,13 +15,15 @@ router.use((req, res, next) => {
 })
 
 
+ 
+
 router.get('/', (req, res) => {
     res.send('Backend funcionandoX!');
 });
 
 
 router.post('/register', async (req, res) => {
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
 
@@ -40,7 +42,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
- 
+
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ message: 'Usuário não encontrado' });
 
@@ -76,6 +78,7 @@ router.post('/logout', (req, res) => {
 
 router.post('/google', async (req, res) => {
     console.log("CHEGOU GOOGLE")
+
     const { credential } = req.body; // o token JWT do Google (ID Token)
 
     try {
@@ -123,5 +126,64 @@ router.get('/me', (req, res) => {
     }
 
 })
+
+
+ function isAuthenticated(req, res, next) {
+    console.log("MIDDLWARE FUNCIONANDO")
+    return next();
+//   const authHeader = req.headers.authorization;
+
+//   if (!authHeader?.startsWith('Bearer ')) {
+//     return res.status(401).json({ error: 'Token não fornecido' });
+//   }
+
+//   const token = authHeader.split(' ')[1];
+
+//   try {
+//     // 1. Tenta verificar como token do Google
+//     const ticket = await googleClient.verifyIdToken({
+//       idToken: token,
+//       audience: process.env.GOOGLE_CLIENT_ID,
+//     });
+
+//     const googlePayload = ticket.getPayload();
+//     req.user = { provider: 'google', ...googlePayload };
+//     return next(); // ✅ Se for válido do Google, continua
+
+//   } catch (googleError) {
+//     // Se falhar, tenta como JWT local
+//     try {
+//       const localPayload = jwt.verify(token, process.env.JWT_SECRET);
+//       req.user = { provider: 'local', ...localPayload };
+//       return next(); // ✅ Token local também válido
+//     } catch (jwtError) {
+//       console.error('Token inválido:', jwtError.message);
+//       return res.status(403).json({ error: 'Token inválido' });
+//     }
+//   }
+}
+
+
+router.get('/movies',  isAuthenticated,  async (req,   res) => {
+    const url = 'https://api.themoviedb.org/3/trending/movie/day?language=en-US';
+    const options = {
+        method: 'GET',
+        headers: {
+            accept: 'application/json',
+            Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NDk3N2M0NDhiNzZjYjMyODY5NmNhZWMyMGQyNDAxNSIsIm5iZiI6MTcwNTA5NzY1MC4xNjUsInN1YiI6IjY1YTFiOWIyOWFlNjEzMDEyZWI3NzQ5OSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.tKnWyb2UanxxqUvmFJHLIbMt_qzEaTxNR0jvvWcTFCw'
+        }
+    };
+
+    try {
+        const resp = await fetch(url, options)
+        const data = await resp.json();
+ 
+        res.json(data);
+    } catch (error) {
+        console.log("Error Fetching Movies: ", error);
+    }
+});
+
+
 
 module.exports = router;
