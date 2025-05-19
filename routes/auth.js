@@ -144,12 +144,14 @@ router.get('/me', (req, res) => {
 
     const googlePayload = ticket.getPayload();
     req.user = { provider: "google", ...googlePayload };
+    console.log(req.user);
     return next();
   } catch (googleError) {
     // 2. Se falhar, tenta como JWT local
     try {
       const localPayload = jwt.verify(token, process.env.JWT_SECRET);
       req.user = { provider: "local", ...localPayload };
+      console.log(req.user);
       return next();
     } catch (jwtError) {
       console.error("Token inválido:", jwtError.message);
