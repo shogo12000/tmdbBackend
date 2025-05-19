@@ -53,7 +53,7 @@ router.post('/login', async (req, res) => {
 
         res.cookie('session_token', token, {
             httpOnly: true,
-            secure: true,
+            secure: true, 
             sameSite: 'None',
             maxAge: 60 * 60 * 1000
         });
@@ -128,40 +128,34 @@ router.get('/me', (req, res) => {
 })
 
 
- function isAuthenticated(req, res, next) {
+ async function isAuthenticated(req, res, next) {
     console.log("MIDDLWARE FUNCIONANDO")
 
   const token = req.cookies.session_token;
     console.log(token);
-//   if (!authHeader?.startsWith('Bearer ')) {
-//     return res.status(401).json({ error: 'Token não fornecido' });
-//   }
 
-//   const token = authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({ message: "Não autenticado" });
+  try {
+    // 1. Tenta verificar como token do Google
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
 
-//   try {
-//     // 1. Tenta verificar como token do Google
-//     const ticket = await googleClient.verifyIdToken({
-//       idToken: token,
-//       audience: process.env.GOOGLE_CLIENT_ID,
-//     });
-
-//     const googlePayload = ticket.getPayload();
-//     req.user = { provider: 'google', ...googlePayload };
-//     return next(); // ✅ Se for válido do Google, continua
-
-//   } catch (googleError) {
-//     // Se falhar, tenta como JWT local
-//     try {
-//       const localPayload = jwt.verify(token, process.env.JWT_SECRET);
-//       req.user = { provider: 'local', ...localPayload };
-//       return next(); // ✅ Token local também válido
-//     } catch (jwtError) {
-//       console.error('Token inválido:', jwtError.message);
-//       return res.status(403).json({ error: 'Token inválido' });
-//     }
-//   }
+    const googlePayload = ticket.getPayload();
+    req.user = { provider: "google", ...googlePayload };
     return next();
+  } catch (googleError) {
+    // 2. Se falhar, tenta como JWT local
+    try {
+      const localPayload = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = { provider: "local", ...localPayload };
+      return next();
+    } catch (jwtError) {
+      console.error("Token inválido:", jwtError.message);
+      return res.status(403).json({ error: "Token inválido" });
+    }
+  }  
 }
 
 
