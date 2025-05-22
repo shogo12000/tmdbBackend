@@ -15,7 +15,7 @@ router.use((req, res, next) => {
 })
 
 
- 
+
 
 router.get('/', (req, res) => {
     res.send('Backend funcionandoX!');
@@ -53,7 +53,7 @@ router.post('/login', async (req, res) => {
 
         res.cookie('session_token', token, {
             httpOnly: true,
-            secure: true, 
+            secure: true,
             sameSite: 'None',
             maxAge: 60 * 60 * 1000
         });
@@ -128,40 +128,40 @@ router.get('/me', (req, res) => {
 })
 
 
- async function isAuthenticated(req, res, next) {
+async function isAuthenticated(req, res, next) {
     console.log("MIDDLWARE FUNCIONANDO")
 
-  const token = req.cookies.session_token;
+    const token = req.cookies.session_token;
     console.log(token);
 
     if (!token) return res.status(401).json({ message: "Não autenticado" });
-  try {
-    // 1. Tenta verificar como token do Google
-    const ticket = await googleClient.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    const googlePayload = ticket.getPayload();
-    req.user = { provider: "google", ...googlePayload };
-    console.log(req.user);
-    return next();
-  } catch (googleError) {
-    // 2. Se falhar, tenta como JWT local
     try {
-      const localPayload = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = { provider: "local", ...localPayload };
-      console.log(req.user);
-      return next();
-    } catch (jwtError) {
-      console.error("Token inválido:", jwtError.message);
-      return res.status(403).json({ error: "Token inválido" });
+        // 1. Tenta verificar como token do Google
+        const ticket = await googleClient.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const googlePayload = ticket.getPayload();
+        req.user = { provider: "google", ...googlePayload };
+        console.log(req.user);
+        return next();
+    } catch (googleError) {
+        // 2. Se falhar, tenta como JWT local
+        try {
+            const localPayload = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = { provider: "local", ...localPayload };
+            console.log(req.user);
+            return next();
+        } catch (jwtError) {
+            console.error("Token inválido:", jwtError.message);
+            return res.status(403).json({ error: "Token inválido" });
+        }
     }
-  }  
 }
 
 
-router.get('/movies',  isAuthenticated,  async (req,   res) => {
+router.get('/movies', isAuthenticated, async (req, res) => {
     const url = 'https://api.themoviedb.org/3/trending/movie/day?language=en-US';
     const options = {
         method: 'GET',
@@ -174,13 +174,35 @@ router.get('/movies',  isAuthenticated,  async (req,   res) => {
     try {
         const resp = await fetch(url, options)
         const data = await resp.json();
- 
+
         res.json(data);
     } catch (error) {
         console.log("Error Fetching Movies: ", error);
     }
 });
 
+router.get('/movie/:id', async (req, res) => {
+    const movieId = req.params.id;
+    console.log(movieId);
+    const url = `https://api.themoviedb.org/3/movie/${movieId}`;
 
+    const options = {
+        method: 'GET',
+        headers: {
+            accept: 'application/json',
+            Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NDk3N2M0NDhiNzZjYjMyODY5NmNhZWMyMGQyNDAxNSIsIm5iZiI6MTcwNTA5NzY1MC4xNjUsInN1YiI6IjY1YTFiOWIyOWFlNjEzMDEyZWI3NzQ5OSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.tKnWyb2UanxxqUvmFJHLIbMt_qzEaTxNR0jvvWcTFCw'
+        }
+    }
+
+    try {
+        const resp = await fetch(url, options)
+        const data = await resp.json();
+ 
+        res.json(data);
+    } catch (error) {
+        console.log("Error Fetching Movies: ", error);
+    }
+    return res;
+})
 
 module.exports = router;
