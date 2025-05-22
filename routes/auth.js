@@ -8,6 +8,8 @@ const { OAuth2Client } = require('google-auth-library');
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '475376767328-soku8p9dl739un1ggshsnfijo5bjcc3m.apps.googleusercontent.com';
 const client = new OAuth2Client(CLIENT_ID);
 
+const TMDB_TOKEN = process.env.TMDB_API_TOKEN;
+
 router.use((req, res, next) => {
     //fazer a validacao do token aqui 
     console.log("PASSOU ROUTER USER")
@@ -163,11 +165,12 @@ async function isAuthenticated(req, res, next) {
 
 router.get('/movies', isAuthenticated, async (req, res) => {
     const url = 'https://api.themoviedb.org/3/trending/movie/day?language=en-US';
+    
     const options = {
         method: 'GET',
         headers: {
             accept: 'application/json',
-            Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NDk3N2M0NDhiNzZjYjMyODY5NmNhZWMyMGQyNDAxNSIsIm5iZiI6MTcwNTA5NzY1MC4xNjUsInN1YiI6IjY1YTFiOWIyOWFlNjEzMDEyZWI3NzQ5OSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.tKnWyb2UanxxqUvmFJHLIbMt_qzEaTxNR0jvvWcTFCw'
+            Authorization: `Bearer ${TMDB_TOKEN}`
         }
     };
 
@@ -183,14 +186,14 @@ router.get('/movies', isAuthenticated, async (req, res) => {
 
 router.get('/movie/:id', async (req, res) => {
     const movieId = req.params.id;
-    console.log(movieId);
+ 
     const url = `https://api.themoviedb.org/3/movie/${movieId}`;
 
     const options = {
         method: 'GET',
         headers: {
             accept: 'application/json',
-            Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NDk3N2M0NDhiNzZjYjMyODY5NmNhZWMyMGQyNDAxNSIsIm5iZiI6MTcwNTA5NzY1MC4xNjUsInN1YiI6IjY1YTFiOWIyOWFlNjEzMDEyZWI3NzQ5OSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.tKnWyb2UanxxqUvmFJHLIbMt_qzEaTxNR0jvvWcTFCw'
+            Authorization: `Bearer ${TMDB_TOKEN}`
         }
     }
 
