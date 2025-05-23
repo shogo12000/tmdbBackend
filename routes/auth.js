@@ -165,7 +165,7 @@ async function isAuthenticated(req, res, next) {
 
 router.get('/movies', isAuthenticated, async (req, res) => {
     const url = 'https://api.themoviedb.org/3/trending/movie/day?language=en-US';
-    
+
     const options = {
         method: 'GET',
         headers: {
@@ -186,7 +186,7 @@ router.get('/movies', isAuthenticated, async (req, res) => {
 
 router.get('/movie/:id', isAuthenticated, async (req, res) => {
     const movieId = req.params.id;
- 
+
     const url = `https://api.themoviedb.org/3/movie/${movieId}`;
 
     const options = {
@@ -200,7 +200,7 @@ router.get('/movie/:id', isAuthenticated, async (req, res) => {
     try {
         const resp = await fetch(url, options)
         const data = await resp.json();
- 
+
         res.json(data);
     } catch (error) {
         console.log("Error Fetching Movies: ", error);
@@ -208,15 +208,33 @@ router.get('/movie/:id', isAuthenticated, async (req, res) => {
     return res;
 })
 
-router.post('/user-movies', isAuthenticated, async (req, res)=>{
+router.post('/user-movies', isAuthenticated, async (req, res) => {
     const { id, title, poster, statuses } = req.body;
+    const userEmail = req.user.email;
     console.log(req.body);
     console.log(title);
     console.log(statuses);
 
     console.log("Funciona ")
 
-    res.status(200).json({message: "Salvo com Sucesso"})
+    try {
+        const savedMovie = await UserMovie.findOneAndUpdate(
+            { tmdbId: id, userEmail },
+            {
+                title,
+                poster,
+                statuses,
+                updatedAt: new Date(),
+                userEmail,
+            },
+            { upsert: true, new: true }
+        );
+
+        res.status(200).json({ message: "Salvo com sucesso", data: savedMovie });
+    } catch (error) {
+        console.error("Erro ao salvar:", error);
+        res.status(500).json({ message: "Erro interno do servidor" });
+    }
 })
 
 module.exports = router;
