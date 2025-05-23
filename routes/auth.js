@@ -209,7 +209,7 @@ router.get('/movie/:id',  async (req, res) => {
     return res;
 })
 
-router.post('/user-movies',   async (req, res) => {
+router.post('/user-movies',  isAuthenticated, async (req, res) => {
     const { id, title, poster, statuses } = req.body;
     const userEmail = req.user.email;
     console.log(req.body);
