@@ -185,7 +185,7 @@ router.get('/movies', isAuthenticated, async (req, res) => {
     }
 });
 
-router.get('/movie/:id', isAuthenticated, async (req, res) => {
+router.get('/movie/:id',  async (req, res) => {
     const movieId = req.params.id;
 
     const url = `https://api.themoviedb.org/3/movie/${movieId}`;
@@ -209,7 +209,7 @@ router.get('/movie/:id', isAuthenticated, async (req, res) => {
     return res;
 })
 
-router.post('/user-movies', isAuthenticated, async (req, res) => {
+router.post('/user-movies',   async (req, res) => {
     const { id, title, poster, statuses } = req.body;
     const userEmail = req.user.email;
     console.log(req.body);
