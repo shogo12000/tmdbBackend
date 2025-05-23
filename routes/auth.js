@@ -291,4 +291,21 @@ router.post('/user-movies', isAuthenticated, async (req, res) => {
     // }
 })
 
+router.post('/get-movies', isAuthenticated, async (req, res) => {
+    const userEmail = req.user.email;
+
+    try {
+        const userMovies = await UserMovie.findOne({ userEmail });
+
+        if (!userMovies || userMovies.movies.length === 0) {
+            return res.status(404).json({ message: 'Nenhum filme encontrado para este usuário.' });
+        }
+
+        res.status(200).json({ movies: userMovies.movies });
+    } catch (error) {
+        console.error('Erro ao buscar filmes:', error);
+        res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+});
+
 module.exports = router;
