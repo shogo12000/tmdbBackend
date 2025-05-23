@@ -185,7 +185,7 @@ router.get('/movies', isAuthenticated, async (req, res) => {
     }
 });
 
-router.get('/movie/:id',  async (req, res) => {
+router.get('/movie/:id', async (req, res) => {
     const movieId = req.params.id;
 
     const url = `https://api.themoviedb.org/3/movie/${movieId}`;
@@ -209,33 +209,86 @@ router.get('/movie/:id',  async (req, res) => {
     return res;
 })
 
-router.post('/user-movies',  isAuthenticated, async (req, res) => {
+router.post('/user-movies', isAuthenticated, async (req, res) => {
     const { id, title, poster, statuses } = req.body;
     const userEmail = req.user.email;
-    console.log(req.body);
-    console.log(title);
-    console.log(statuses);
-
-    console.log("Funciona ")
 
     try {
-        const savedMovie = await UserMovie.findOneAndUpdate(
-            { tmdbId: id, userEmail },
-            {
+        const userMovies = await UserMovie.findOne({ userEmail });
+
+        if (!userMovies) {
+            // usuário ainda não tem nenhum filme salvo
+            const newEntry = new UserMovie({
+                userEmail,
+                movies: [{
+                    tmdbId: id,
+                    title,
+                    poster,
+                    statuses,
+                    updatedAt: new Date()
+                }]
+            });
+
+            await newEntry.save();
+            return res.status(201).json({ message: "Primeiro filme salvo com sucesso" });
+        }
+
+        // Verifica se o filme já existe
+        const existingMovieIndex = userMovies.movies.findIndex(m => m.tmdbId === id);
+
+        if (existingMovieIndex >= 0) {
+            // Atualiza filme existente
+            userMovies.movies[existingMovieIndex] = {
+                ...userMovies.movies[existingMovieIndex]._doc,
                 title,
                 poster,
                 statuses,
-                updatedAt: new Date(),
-                userEmail,
-            },
-            { upsert: true, new: true }
-        );
+                updatedAt: new Date()
+            };
+        } else {
+            // Adiciona novo filme
+            userMovies.movies.push({
+                tmdbId: id,
+                title,
+                poster,
+                statuses,
+                updatedAt: new Date()
+            });
+        }
 
-        res.status(200).json({ message: "Salvo com sucesso", data: savedMovie });
+        await userMovies.save();
+        res.status(200).json({ message: "Filme salvo/atualizado com sucesso" });
+
     } catch (error) {
         console.error("Erro ao salvar:", error);
         res.status(500).json({ message: "Erro interno do servidor" });
     }
+    // const { id, title, poster, statuses } = req.body;
+    // const userEmail = req.user.email;
+    // console.log(req.body);
+    // console.log(title);
+    // console.log(statuses);
+
+    // console.log("Funciona ")
+
+    // try {
+    //     const savedMovie = await UserMovie.findOneAndUpdate(
+    //         { tmdbId: id, userEmail },
+    //         {
+    //             title,
+    //             poster,
+    //             statuses,
+    //             updatedAt: new Date(),
+    //             userEmail,
+    //         },
+    //         { upsert: true, new: true }
+    //     );
+
+    //     res.status(200).json({ message: "Salvo com sucesso", data: savedMovie });
+    // } catch (error) {
+    //     console.error("Erro ao salvar:", error);
+    //     res.status(500).json({ message: "Erro interno do servidor" });
+    // }
 })
 
 module.exports = router;
