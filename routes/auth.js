@@ -210,9 +210,11 @@ router.get('/movie/:id', isAuthenticated, async (req, res) => {
 
 router.post('/user-movies', isAuthenticated, async (req, res)=>{
     const { id, title, poster, statuses } = req.body;
-
+    console.log(req.body);
     console.log(title);
     console.log(statuses);
+
+    console.log("Funciona ")
 
     res.status(200).json({message: "Salvo com Sucesso"})
 })
