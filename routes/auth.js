@@ -11,6 +11,14 @@ const client = new OAuth2Client(CLIENT_ID);
 
 const TMDB_TOKEN = process.env.TMDB_API_TOKEN;
 
+const optionsTmdb = {
+    method: 'GET',
+    headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${TMDB_TOKEN}`
+    }
+}
+
 router.use((req, res, next) => {
     //fazer a validacao do token aqui 
     console.log("PASSOU ROUTER USER")
@@ -307,5 +315,17 @@ router.post('/get-movies', isAuthenticated, async (req, res) => {
         res.status(500).json({ message: 'Erro interno do servidor.' });
     }
 });
+
+router.get('/search-movies', isAuthenticated, async (req, res) => {
+    const { query } = req.query;
+    
+    try {
+        const response = await fetch(`https://api.themoviedb.org/3/search/movie?query=${query}&include_adult=false&language=en-US&page=1`, optionsTmdb);
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching movies", error })
+    }
+})
 
 module.exports = router;
